@@ -52,7 +52,7 @@ export async function DELETE(
   req: Request,
   { params }: { params?: { id?: string } } = {}
 ) {
-  const id = getIdFromReq(req, params);
+  const id = await getIdFromReq(req, params);
   if (!id) return new NextResponse("Invalid id", { status: 400 });
   if (!ObjectId.isValid(id))
     return new NextResponse("Invalid ObjectId", { status: 400 });
