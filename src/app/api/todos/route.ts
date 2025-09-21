@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
 
+// GET api for fetching all todos
 export async function GET() {
   const client = await clientPromise;
   const db = client.db(process.env.MONGODB_DB || undefined);
@@ -9,6 +10,7 @@ export async function GET() {
   return NextResponse.json(todos);
 }
 
+// POST api for creating a new todo
 export async function POST(req: Request) {
   const body = await req.json();
   const { text } = body;
