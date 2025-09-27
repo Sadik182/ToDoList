@@ -84,7 +84,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="p-6 max-w-8xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold">Dashboard</h1>
         <div className="flex gap-2">
@@ -111,7 +111,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Left: Dates table */}
           <div className="md:col-span-1 bg-white p-4 rounded shadow">
-            <h2 className="text-lg font-medium mb-3">Dates</h2>
+            <h2 className="text-lg font-medium font-bold mb-3">All Todos</h2>
             <table className="w-full text-left">
               <thead>
                 <tr className="text-sm text-gray-500">

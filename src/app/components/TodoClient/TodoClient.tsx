@@ -154,7 +154,7 @@ export default function TodoClient() {
     : [];
 
   return (
-    <div className="max-w-8xl mx-auto px-4 py-8">
+    <div className="max-w-8xl mx-auto px-4 py-8 h-full">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold">My To-Do Home</h1>
         <p className="text-sm text-gray-500">Quick view: today and tomorrow</p>
@@ -162,7 +162,7 @@ export default function TodoClient() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Today's Panel */}
-        <section className="bg-white p-4 rounded shadow">
+        <section className="bg-white px-2 py-4 rounded shadow">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="text-lg font-medium">
@@ -172,7 +172,11 @@ export default function TodoClient() {
               <div className="text-xs text-gray-400">{todayISO ?? ""}</div>
             </div>
             <div className="text-sm text-gray-600">
-              {todaysTodos.length} task(s)
+              {todaysTodos.length === 0
+                ? "No task"
+                : `${todaysTodos.length} ${
+                    todaysTodos.length === 1 ? "task" : "tasks"
+                  }`}
             </div>
           </div>
 
@@ -197,7 +201,7 @@ export default function TodoClient() {
             </button>
           </form>
 
-          <ul className="space-y-3">
+          <ul className="space-y-3 max-h-90 h-100 overflow-y-auto pr-1">
             {todaysTodos.length === 0 && (
               <li className="text-gray-500">No tasks for today.</li>
             )}
@@ -221,7 +225,7 @@ export default function TodoClient() {
                 <div className="flex gap-3 items-center">
                   <button
                     onClick={() => remove(t._id)}
-                    className="text-sm text-red-500"
+                    className="text-sm text-red-500 cursor-pointer"
                   >
                     Delete
                   </button>
@@ -243,7 +247,11 @@ export default function TodoClient() {
               <div className="text-xs text-gray-400">{tomorrowISO ?? ""}</div>
             </div>
             <div className="text-sm text-gray-600">
-              {tomorrowsTodos.length} task(s)
+              {tomorrowsTodos.length === 0
+                ? "No task"
+                : `${tomorrowsTodos.length} ${
+                    tomorrowsTodos.length === 1 ? "task" : "tasks"
+                  }`}
             </div>
           </div>
 
