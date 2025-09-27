@@ -14,8 +14,11 @@ export default function Navbar() {
           <Link href="/" className="text-sm hover:underline">
             Home
           </Link>
-          <Link href="#" className="text-sm text-gray-500">
-            About
+          <Link href="/notes" className="text-sm hover:underline">
+            Notes
+          </Link>
+          <Link href="/dashboard" className="text-sm hover:underline">
+            Dashboard
           </Link>
         </div>
       </div>
