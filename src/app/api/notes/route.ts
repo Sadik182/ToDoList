@@ -4,7 +4,7 @@ import clientPromise from "@/lib/mongodb"; // your MongoDB connection
 export async function GET() {
   try {
     const client = await clientPromise;
-    const db = client.db("notesDb");
+    const db = client.db(process.env.MONGODB_DB || undefined);
     const notes = await db
       .collection("notes")
       .find({})
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Title required" }, { status: 400 });
 
     const client = await clientPromise;
-    const db = client.db("notesDb");
+    const db = client.db(process.env.MONGODB_DB || undefined);
 
     const result = await db.collection("notes").insertOne({
       title,
