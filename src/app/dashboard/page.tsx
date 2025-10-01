@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import NotesDashboard from "../components/NotesDashboard/NotesDashboard";
 
 type Todo = {
   _id?: string;
@@ -222,15 +223,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {activeTab === "notes" && (
-        <div className="bg-white p-6 rounded shadow">
-          <h2 className="text-lg font-medium mb-3">Notes (placeholder)</h2>
-          <p className="text-gray-500">
-            Notes feature will be here — you can add, edit and group notes
-            later.
-          </p>
-        </div>
-      )}
+      {activeTab === "notes" && <NotesDashboard />}
     </div>
   );
 }
