@@ -13,13 +13,13 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50">
+    <nav className="bg-gray-800 shadow-sm sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
           {/* Brand */}
           <Link
             href="/"
-            className="text-xl font-semibold text-gray-800 tracking-tight"
+            className="text-xl font-semibold text-white tracking-tight"
           >
             MyTodo
           </Link>
@@ -33,10 +33,10 @@ export default function Navbar() {
                   key={href}
                   href={href}
                   aria-current={isActive ? "page" : undefined}
-                  className={`text-sm font-medium transition-colors duration-200 ${
+                  className={`text-sm font-medium transition-colors duration-200 text-white ${
                     isActive
-                      ? "text-blue-600 border-b-2 border-blue-600"
-                      : "text-gray-600 hover:text-gray-900"
+                      ? "text-white border-b-2 border-white"
+                      : "text-gray-600 hover:text-white"
                   }`}
                 >
                   {label}
