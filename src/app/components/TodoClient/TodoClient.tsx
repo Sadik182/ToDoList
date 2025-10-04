@@ -155,9 +155,13 @@ export default function TodoClient() {
 
   return (
     <div className="max-w-8xl mx-auto px-4 py-8 h-full">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold">My To-Do Home</h1>
-        <p className="text-sm text-gray-500">Quick view: today and tomorrow</p>
+      <div className="mb-4 flex justify-between w-full">
+        <div className="w-1/2">
+          <h1 className="text-2xl mb-2 font-bold">Add To-Do for Today</h1>
+        </div>
+        <div className="w-1/2 text-right pr-2">
+          <h1 className="text-2xl mb-2 font-bold">Add To-Do for Tomorrow</h1>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
