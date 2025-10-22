@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import type { Note } from "@/types";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 const STAGES = [
   "Idea",
@@ -174,11 +175,18 @@ export default function NotesClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stage: newStage }),
       });
-      if (!res.ok) throw new Error("Failed to update");
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${res.status}: Failed to update stage`);
+      }
+      
       const updated = await res.json();
       setNotes((s) => s.map((n) => (n._id === id ? updated : n)));
     } catch (err) {
-      console.error(err);
+      console.error("Error updating stage:", err);
+      // You could add a toast notification here to show the error to the user
+      alert(`Failed to update stage: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   }
 
@@ -196,114 +204,31 @@ export default function NotesClient() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Notes</h1>
-        <div className="text-sm text-gray-500">
-          Daily notes — take structured notes with stages
-        </div>
-      </div>
-
-      {/* NOTE Editor Card */}
-      <div className="bg-white rounded shadow p-4 mb-8 flex flex-col">
-        {/* Header: title + stage */}
-        <div className="flex items-start gap-4 mb-4">
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Note title"
-            className="flex-1 p-3 border rounded text-lg font-medium"
-            aria-label="Note title"
-          />
-          <select
-            value={stage}
-            onChange={(e) => setStage(e.target.value as Note["stage"])}
-            className="p-2 border rounded"
-            aria-label="Note stage"
-          >
-            {STAGES.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Body: numbered lines editor */}
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <div className="space-y-2">
-              {lines.map((line, idx) => (
-                <div key={idx} className="flex items-start gap-2">
-                  <div className="w-6 text-right text-sm text-gray-600 pt-3 select-none">
-                    {idx + 1}.
-                  </div>
-                  <textarea
-                    value={line}
-                    onChange={(e) => updateLine(idx, e.target.value)}
-                    rows={1}
-                    className="flex-1 p-2 border rounded resize-none"
-                    placeholder="Type note line..."
-                  />
-                  <div className="flex flex-col gap-1">
-                    <button
-                      type="button"
-                      onClick={() => addLine(idx)}
-                      className="px-2 py-1 text-xs bg-gray-100 rounded"
-                      aria-label={`Add line after ${idx + 1}`}
-                    >
-                      +
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => removeLine(idx)}
-                      className="px-2 py-1 text-xs bg-red-50 text-red-600 rounded"
-                      aria-label={`Remove line ${idx + 1}`}
-                    >
-                      −
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-3 text-sm text-gray-500">
-              Tip: press the + button to add a new numbered line.
-            </div>
-          </div>
-
-          {/* Live preview */}
-          <div className="w-1/3 border-l pl-4 hidden md:block">
-            <div className="text-xs text-gray-500 mb-2">Preview</div>
-            <LinesViewer lines={lines} />
+    <ProtectedRoute>
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="mb-6 flex items-center justify-between">
+          <h1 className="text-2xl font-semibold">Notes</h1>
+          <div className="text-sm text-gray-500">
+            Daily notes — take structured notes with stages
           </div>
         </div>
 
-        {/* Footer: Save button bottom-right */}
-        <div className="mt-4 flex justify-end">
-          <button
-            onClick={(e) => createNote(e)}
-            disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded shadow"
-          >
-            Save (today)
-          </button>
-        </div>
-      </div>
-
-      {/* Edit panel (if editing) */}
-      {editingId && (
-        <div className="bg-white rounded shadow p-4 mb-6">
-          <div className="flex items-start gap-4 mb-3">
+        {/* NOTE Editor Card */}
+        <div className="bg-white rounded shadow p-4 mb-8 flex flex-col">
+          {/* Header: title + stage */}
+          <div className="flex items-start gap-4 mb-4">
             <input
-              value={editTitle}
-              onChange={(e) => setEditTitle(e.target.value)}
-              className="flex-1 p-2 border rounded text-lg font-medium"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Note title"
+              className="flex-1 p-3 border rounded text-lg font-medium"
+              aria-label="Note title"
             />
             <select
-              value={editStage}
-              onChange={(e) => setEditStage(e.target.value as Note["stage"])}
+              value={stage}
+              onChange={(e) => setStage(e.target.value as Note["stage"])}
               className="p-2 border rounded"
+              aria-label="Note stage"
             >
               {STAGES.map((s) => (
                 <option key={s} value={s}>
@@ -313,158 +238,243 @@ export default function NotesClient() {
             </select>
           </div>
 
-          <div className="space-y-2">
-            {editLines.map((line, idx) => (
-              <div key={idx} className="flex items-start gap-2">
-                <div className="w-6 text-right text-sm text-gray-600 pt-3 select-none">
-                  {idx + 1}.
-                </div>
-                <textarea
-                  value={line}
-                  onChange={(e) => {
-                    setEditLines((prev) => {
-                      const copy = [...prev];
-                      copy[idx] = e.target.value;
-                      return copy;
-                    });
-                  }}
-                  rows={1}
-                  className="flex-1 p-2 border rounded resize-none"
-                />
-                <div className="flex flex-col gap-1">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditLines((prev) => {
-                        const copy = [...prev];
-                        copy.splice(idx + 1, 0, "");
-                        return copy;
-                      });
-                    }}
-                    className="px-2 py-1 text-xs bg-gray-100 rounded"
-                  >
-                    +
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditLines((prev) => {
-                        const copy = [...prev];
-                        copy.splice(idx, 1);
-                        return copy.length ? copy : [""];
-                      });
-                    }}
-                    className="px-2 py-1 text-xs bg-red-50 text-red-600 rounded"
-                  >
-                    −
-                  </button>
-                </div>
+          {/* Body: numbered lines editor */}
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <div className="space-y-2">
+                {lines.map((line, idx) => (
+                  <div key={idx} className="flex items-start gap-2">
+                    <div className="w-6 text-right text-sm text-gray-600 pt-3 select-none">
+                      {idx + 1}.
+                    </div>
+                    <textarea
+                      value={line}
+                      onChange={(e) => updateLine(idx, e.target.value)}
+                      rows={1}
+                      className="flex-1 p-2 border rounded resize-none"
+                      placeholder="Type note line..."
+                    />
+                    <div className="flex flex-col gap-1">
+                      <button
+                        type="button"
+                        onClick={() => addLine(idx)}
+                        className="px-2 py-1 text-xs bg-gray-100 rounded"
+                        aria-label={`Add line after ${idx + 1}`}
+                      >
+                        +
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeLine(idx)}
+                        className="px-2 py-1 text-xs bg-red-50 text-red-600 rounded"
+                        aria-label={`Remove line ${idx + 1}`}
+                      >
+                        −
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
 
-          <div className="mt-4 flex justify-end gap-2">
-            <button
-              onClick={() => setEditingId(null)}
-              className="px-4 py-2 bg-gray-200 rounded"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={(e) => saveEdit(e)}
-              className="px-4 py-2 bg-green-600 text-white rounded"
-            >
-              Save changes
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Grouped notes list */}
-      <div className="space-y-6">
-        {groupedByDate.length === 0 && (
-          <div className="text-gray-500">No notes yet.</div>
-        )}
-
-        {groupedByDate.map((g) => (
-          <div key={g.date} className="bg-white p-4 rounded shadow">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <div className="font-medium">
-                  {new Date(g.date).toLocaleDateString(undefined, {
-                    weekday: "long",
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </div>
-                <div className="text-xs text-gray-400">{g.date}</div>
-              </div>
-              <div className="text-sm text-gray-600">
-                {g.notes.length} {g.notes.length === 1 ? "note" : "notes"}
+              <div className="mt-3 text-sm text-gray-500">
+                Tip: press the + button to add a new numbered line.
               </div>
             </div>
 
-            <ul className="space-y-3">
-              {g.notes.map((n) => (
-                <li
-                  key={n._id}
-                  className="p-3 bg-gray-50 rounded flex flex-col md:flex-row md:items-start md:justify-between gap-3"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3">
-                      <div className="font-medium text-lg">{n.title}</div>
-                      <div className="text-xs text-gray-500 px-2 py-1 rounded bg-white border">
-                        {n.stage}
+            {/* Live preview */}
+            <div className="w-1/3 border-l pl-4 hidden md:block">
+              <div className="text-xs text-gray-500 mb-2">Preview</div>
+              <LinesViewer lines={lines} />
+            </div>
+          </div>
+
+          {/* Footer: Save button bottom-right */}
+          <div className="mt-4 flex justify-end">
+            <button
+              onClick={(e) => createNote(e)}
+              disabled={loading}
+              className="px-4 py-2 bg-blue-600 text-white rounded shadow"
+            >
+              Save (today)
+            </button>
+          </div>
+        </div>
+
+        {/* Edit panel (if editing) */}
+        {editingId && (
+          <div className="bg-white rounded shadow p-4 mb-6">
+            <div className="flex items-start gap-4 mb-3">
+              <input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="flex-1 p-2 border rounded text-lg font-medium"
+              />
+              <select
+                value={editStage}
+                onChange={(e) => setEditStage(e.target.value as Note["stage"])}
+                className="p-2 border rounded"
+              >
+                {STAGES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              {editLines.map((line, idx) => (
+                <div key={idx} className="flex items-start gap-2">
+                  <div className="w-6 text-right text-sm text-gray-600 pt-3 select-none">
+                    {idx + 1}.
+                  </div>
+                  <textarea
+                    value={line}
+                    onChange={(e) => {
+                      setEditLines((prev) => {
+                        const copy = [...prev];
+                        copy[idx] = e.target.value;
+                        return copy;
+                      });
+                    }}
+                    rows={1}
+                    className="flex-1 p-2 border rounded resize-none"
+                  />
+                  <div className="flex flex-col gap-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditLines((prev) => {
+                          const copy = [...prev];
+                          copy.splice(idx + 1, 0, "");
+                          return copy;
+                        });
+                      }}
+                      className="px-2 py-1 text-xs bg-gray-100 rounded"
+                    >
+                      +
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditLines((prev) => {
+                          const copy = [...prev];
+                          copy.splice(idx, 1);
+                          return copy.length ? copy : [""];
+                        });
+                      }}
+                      className="px-2 py-1 text-xs bg-red-50 text-red-600 rounded"
+                    >
+                      −
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                onClick={() => setEditingId(null)}
+                className="px-4 py-2 bg-gray-200 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={(e) => saveEdit(e)}
+                className="px-4 py-2 bg-green-600 text-white rounded"
+              >
+                Save changes
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Grouped notes list */}
+        <div className="space-y-6">
+          {groupedByDate.length === 0 && (
+            <div className="text-gray-500">No notes yet.</div>
+          )}
+
+          {groupedByDate.map((g) => (
+            <div key={g.date} className="bg-white p-4 rounded shadow">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <div className="font-medium">
+                    {new Date(g.date).toLocaleDateString(undefined, {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </div>
+                  <div className="text-xs text-gray-400">{g.date}</div>
+                </div>
+                <div className="text-sm text-gray-600">
+                  {g.notes.length} {g.notes.length === 1 ? "note" : "notes"}
+                </div>
+              </div>
+
+              <ul className="space-y-3">
+                {g.notes.map((n) => (
+                  <li
+                    key={n._id}
+                    className="p-3 bg-gray-50 rounded flex flex-col md:flex-row md:items-start md:justify-between gap-3"
+                  >
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3">
+                        <div className="font-medium text-lg">{n.title}</div>
+                        <div className="text-xs text-gray-500 px-2 py-1 rounded bg-white border">
+                          {n.stage}
+                        </div>
+                      </div>
+                      <div className="mt-2">
+                        <LinesViewer lines={(n.content || "").split("\n")} />
+                      </div>
+                      <div className="text-xs text-gray-400 mt-2">
+                        {n.createdAt
+                          ? new Date(n.createdAt).toLocaleString()
+                          : ""}
                       </div>
                     </div>
-                    <div className="mt-2">
-                      <LinesViewer lines={(n.content || "").split("\n")} />
-                    </div>
-                    <div className="text-xs text-gray-400 mt-2">
-                      {n.createdAt
-                        ? new Date(n.createdAt).toLocaleString()
-                        : ""}
-                    </div>
-                  </div>
 
-                  <div className="flex flex-col items-start md:items-end gap-2">
-                    <select
-                      value={n.stage}
-                      onChange={(e) =>
-                        updateStage(n._id!, e.target.value as Note["stage"])
-                      }
-                      className="p-1 border rounded text-sm"
-                      aria-label="Change stage"
-                    >
-                      {STAGES.map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="flex flex-col items-start md:items-end gap-2">
+                      <select
+                        value={n.stage}
+                        onChange={(e) =>
+                          updateStage(n._id!, e.target.value as Note["stage"])
+                        }
+                        className="p-1 border rounded text-sm"
+                        aria-label="Change stage"
+                      >
+                        {STAGES.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </select>
 
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => startEdit(n)}
-                        className="text-sm text-blue-600"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => deleteNote(n._id)}
-                        className="text-sm text-red-500"
-                      >
-                        Delete
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => startEdit(n)}
+                          className="text-sm text-blue-600"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => deleteNote(n._id)}
+                          className="text-sm text-red-500"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }

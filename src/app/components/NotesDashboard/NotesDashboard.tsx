@@ -185,11 +185,17 @@ export default function NotesDashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stage: newStage }),
       });
-      if (!res.ok) throw new Error("Failed to update stage");
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${res.status}: Failed to update stage`);
+      }
+      
       const updated = await res.json();
       setNotes((s) => s.map((n) => (n._id === id ? updated : n)));
     } catch (err) {
-      console.error(err);
+      console.error("Error updating stage:", err);
+      alert(`Failed to update stage: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   }
 

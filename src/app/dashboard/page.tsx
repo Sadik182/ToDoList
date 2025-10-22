@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import NotesDashboard from "../components/NotesDashboard/NotesDashboard";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 type Todo = {
   _id?: string;
@@ -85,145 +86,152 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-6 max-w-8xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-semibold">Dashboard</h1>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setActiveTab("todos")}
-            className={`px-3 py-1 rounded ${
-              activeTab === "todos" ? "bg-blue-600 text-white" : "bg-gray-100"
-            }`}
-          >
-            Todos
-          </button>
-          <button
-            onClick={() => setActiveTab("notes")}
-            className={`px-3 py-1 rounded ${
-              activeTab === "notes" ? "bg-blue-600 text-white" : "bg-gray-100"
-            }`}
-          >
-            Notes
-          </button>
-        </div>
-      </div>
-
-      {activeTab === "todos" && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Left: Dates table */}
-          <div className="md:col-span-1 bg-white p-4 rounded shadow">
-            <h2 className="text-lg font-medium font-bold mb-3">All Todos</h2>
-            <table className="w-full text-left">
-              <thead>
-                <tr className="text-sm text-gray-500">
-                  <th className="pb-2">Date</th>
-                  <th className="pb-2">Tasks</th>
-                </tr>
-              </thead>
-              <tbody>
-                {grouped.length === 0 && (
-                  <tr>
-                    <td colSpan={2} className="text-gray-500 py-2">
-                      No todos
-                    </td>
-                  </tr>
-                )}
-                {grouped.map((g) => (
-                  <tr
-                    key={g.date}
-                    className="cursor-pointer hover:bg-gray-50"
-                    onClick={() =>
-                      setSelectedDate(selectedDate === g.date ? null : g.date)
-                    }
-                  >
-                    <td className="py-2">{formatShort(g.date)}</td>
-                    <td className="py-2">
-                      {g.todos.length} ({g.completed}/{g.todos.length} done)
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+    <ProtectedRoute>
+      <div className="p-6 max-w-8xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-semibold">Dashboard</h1>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setActiveTab("todos")}
+              className={`px-3 py-1 rounded ${
+                activeTab === "todos" ? "bg-blue-600 text-white" : "bg-gray-100"
+              }`}
+            >
+              Todos
+            </button>
+            <button
+              onClick={() => setActiveTab("notes")}
+              className={`px-3 py-1 rounded ${
+                activeTab === "notes" ? "bg-blue-600 text-white" : "bg-gray-100"
+              }`}
+            >
+              Notes
+            </button>
           </div>
+        </div>
 
-          {/* Right: Selected date todos */}
-          <div className="md:col-span-2 bg-white p-4 rounded shadow">
-            <h2 className="text-lg font-medium mb-3">Todos</h2>
-            {!selectedDate && (
-              <p className="text-gray-500">
-                Select a date on the left to view its todos.
-              </p>
-            )}
-            {selectedDate && (
-              <>
-                <div className="mb-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-sm text-gray-500">
-                        {new Date(selectedDate).toLocaleDateString(undefined, {
-                          weekday: "long",
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        {selectedDate}
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setSelectedDate(null)}
-                      className="text-sm text-gray-600"
-                    >
-                      Close
-                    </button>
-                  </div>
-                </div>
-
-                <ul className="space-y-3">
-                  {grouped
-                    .find((g) => g.date === selectedDate)
-                    ?.todos.map((t) => (
-                      <li
-                        key={t._id}
-                        className="p-3 bg-gray-50 rounded flex items-center justify-between"
-                      >
-                        <div className="flex items-center gap-3">
-                          <input
-                            type="checkbox"
-                            checked={!!t.completed}
-                            onChange={() =>
-                              toggleComplete(t._id, !!t.completed)
-                            }
-                          />
-                          <span
-                            className={
-                              t.completed ? "line-through text-gray-400" : ""
-                            }
-                          >
-                            {t.text}
-                          </span>
-                        </div>
-                        <div className="flex gap-3 items-center">
-                          <button
-                            onClick={() => remove(t._id)}
-                            className="text-sm text-red-500"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </li>
-                    )) ?? (
-                    <div className="text-gray-500">No todos for this date.</div>
+        {activeTab === "todos" && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Left: Dates table */}
+            <div className="md:col-span-1 bg-white p-4 rounded shadow">
+              <h2 className="text-lg font-medium font-bold mb-3">All Todos</h2>
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="text-sm text-gray-500">
+                    <th className="pb-2">Date</th>
+                    <th className="pb-2">Tasks</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {grouped.length === 0 && (
+                    <tr>
+                      <td colSpan={2} className="text-gray-500 py-2">
+                        No todos
+                      </td>
+                    </tr>
                   )}
-                </ul>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+                  {grouped.map((g) => (
+                    <tr
+                      key={g.date}
+                      className="cursor-pointer hover:bg-gray-50"
+                      onClick={() =>
+                        setSelectedDate(selectedDate === g.date ? null : g.date)
+                      }
+                    >
+                      <td className="py-2">{formatShort(g.date)}</td>
+                      <td className="py-2">
+                        {g.todos.length} ({g.completed}/{g.todos.length} done)
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-      {activeTab === "notes" && <NotesDashboard />}
-    </div>
+            {/* Right: Selected date todos */}
+            <div className="md:col-span-2 bg-white p-4 rounded shadow">
+              <h2 className="text-lg font-medium mb-3">Todos</h2>
+              {!selectedDate && (
+                <p className="text-gray-500">
+                  Select a date on the left to view its todos.
+                </p>
+              )}
+              {selectedDate && (
+                <>
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm text-gray-500">
+                          {new Date(selectedDate).toLocaleDateString(
+                            undefined,
+                            {
+                              weekday: "long",
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            }
+                          )}
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          {selectedDate}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setSelectedDate(null)}
+                        className="text-sm text-gray-600"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+
+                  <ul className="space-y-3">
+                    {grouped
+                      .find((g) => g.date === selectedDate)
+                      ?.todos.map((t) => (
+                        <li
+                          key={t._id}
+                          className="p-3 bg-gray-50 rounded flex items-center justify-between"
+                        >
+                          <div className="flex items-center gap-3">
+                            <input
+                              type="checkbox"
+                              checked={!!t.completed}
+                              onChange={() =>
+                                toggleComplete(t._id, !!t.completed)
+                              }
+                            />
+                            <span
+                              className={
+                                t.completed ? "line-through text-gray-400" : ""
+                              }
+                            >
+                              {t.text}
+                            </span>
+                          </div>
+                          <div className="flex gap-3 items-center">
+                            <button
+                              onClick={() => remove(t._id)}
+                              className="text-sm text-red-500"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </li>
+                      )) ?? (
+                      <div className="text-gray-500">
+                        No todos for this date.
+                      </div>
+                    )}
+                  </ul>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeTab === "notes" && <NotesDashboard />}
+      </div>
+    </ProtectedRoute>
   );
 }

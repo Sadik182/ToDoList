@@ -1,13 +1,20 @@
 import { NextResponse } from "next/server";
-import clientPromise from "@/lib/mongodb"; // your MongoDB connection
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import clientPromise from "@/lib/mongodb";
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const client = await clientPromise;
     const db = client.db(process.env.MONGODB_DB || undefined);
     const notes = await db
       .collection("notes")
-      .find({})
+      .find({ userId: session.user.id })
       .sort({ createdAt: -1 })
       .toArray();
 
@@ -23,6 +30,11 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const data = await req.json();
     const { title, content, date, stage } = data;
 
@@ -37,6 +49,7 @@ export async function POST(req: Request) {
       content,
       date,
       stage,
+      userId: session.user.id,
       createdAt: new Date(),
     });
 
