@@ -39,7 +39,14 @@ export default function NotesClient() {
       if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
       setNotes(
-        data.map((n: any) => ({ ...n, _id: n._id?.toString?.() || n._id }))
+        data.map(
+          (n: {
+            _id: string;
+            title: string;
+            content: string;
+            userId: string;
+          }) => ({ ...n, _id: n._id?.toString?.() || n._id })
+        )
       );
     } catch (err) {
       console.error(err);
@@ -175,18 +182,24 @@ export default function NotesClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ stage: newStage }),
       });
-      
+
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}));
-        throw new Error(errorData.error || `HTTP ${res.status}: Failed to update stage`);
+        throw new Error(
+          errorData.error || `HTTP ${res.status}: Failed to update stage`
+        );
       }
-      
+
       const updated = await res.json();
       setNotes((s) => s.map((n) => (n._id === id ? updated : n)));
     } catch (err) {
       console.error("Error updating stage:", err);
       // You could add a toast notification here to show the error to the user
-      alert(`Failed to update stage: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      alert(
+        `Failed to update stage: ${
+          err instanceof Error ? err.message : "Unknown error"
+        }`
+      );
     }
   }
 

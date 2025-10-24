@@ -5,13 +5,12 @@ if (!process.env.MONGODB_URI) {
 }
 
 const uri = process.env.MONGODB_URI;
-const options = {} as any;
+const options: Record<string, unknown> = {};
 
 let client: MongoClient;
 let clientPromise: Promise<MongoClient>;
 
 declare global {
-  // eslint-disable-next-line no-var
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 

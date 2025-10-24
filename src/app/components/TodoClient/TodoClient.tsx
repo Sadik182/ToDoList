@@ -33,10 +33,17 @@ export default function TodoClient() {
       if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
       setTodos(
-        data.map((t: any) => ({
-          ...t,
-          _id: t._id?.toString?.() || t._id,
-        }))
+        data.map(
+          (t: {
+            _id: string;
+            text: string;
+            completed: boolean;
+            userId: string;
+          }) => ({
+            ...t,
+            _id: t._id?.toString?.() || t._id,
+          })
+        )
       );
     } catch (err) {
       console.error(err);
@@ -112,7 +119,7 @@ export default function TodoClient() {
       if (!res.ok) throw new Error("Failed to create todo");
       const newTodo = await res.json();
       setTodos((s) => [newTodo, ...s]);
-      setTodoText && setTodoText("");
+      if (setTodoText) setTodoText("");
     } catch (err) {
       console.error(err);
     } finally {

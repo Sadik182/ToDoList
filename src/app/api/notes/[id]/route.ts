@@ -1,24 +1,26 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next";
+import type { Session } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { ObjectId } from "mongodb";
 import clientPromise from "@/lib/mongodb";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = (await getServerSession(authOptions)) as Session | null;
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     const client = await clientPromise;
     const db = client.db(process.env.MONGODB_DB || undefined);
     const note = await db
       .collection("notes")
-      .findOne({ _id: new ObjectId(params.id), userId: session.user.id });
+      .findOne({ _id: new ObjectId(id), userId: session.user.id });
 
     if (!note)
       return NextResponse.json({ error: "Note not found" }, { status: 404 });
@@ -34,7 +36,7 @@ export async function GET(
 
 export async function PUT(req: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = (await getServerSession(authOptions)) as Session | null;
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -92,20 +94,21 @@ export async function PUT(req: Request) {
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = (await getServerSession(authOptions)) as Session | null;
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;
     const client = await clientPromise;
     const db = client.db(process.env.MONGODB_DB || undefined);
 
     const result = await db
       .collection("notes")
-      .deleteOne({ _id: new ObjectId(params.id), userId: session.user.id });
+      .deleteOne({ _id: new ObjectId(id), userId: session.user.id });
     if (!result.deletedCount)
       return NextResponse.json({ error: "Note not found" }, { status: 404 });
 

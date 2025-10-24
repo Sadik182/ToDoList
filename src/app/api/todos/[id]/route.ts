@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next";
+import type { Session } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import clientPromise from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
-async function getIdFromReq(req: Request, params?: { id?: string }) {
-  const resolevedParam = params ? await params : undefined;
-  const p = resolevedParam?.id;
+async function getIdFromReq(req: Request, params?: Promise<{ id?: string }>) {
+  const resolvedParam = params ? await params : undefined;
+  const p = resolvedParam?.id;
   if (p) return p;
   try {
     const url = new URL(req.url);
@@ -19,10 +20,10 @@ async function getIdFromReq(req: Request, params?: { id?: string }) {
 
 export async function PUT(
   req: Request,
-  { params }: { params?: { id?: string } } = {}
+  { params }: { params?: Promise<{ id?: string }> } = {}
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = (await getServerSession(authOptions)) as Session | null;
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -36,7 +37,7 @@ export async function PUT(
 
     const body = await req.json().catch(() => ({}));
     const { text, completed } = body as { text?: string; completed?: boolean };
-    const update: any = {};
+    const update: { text?: string; completed?: boolean } = {};
     if (typeof text === "string") update.text = text;
     if (typeof completed === "boolean") update.completed = completed;
 
@@ -80,10 +81,10 @@ export async function PUT(
 
 export async function DELETE(
   req: Request,
-  { params }: { params?: { id?: string } } = {}
+  { params }: { params?: Promise<{ id?: string }> } = {}
 ) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = (await getServerSession(authOptions)) as Session | null;
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
