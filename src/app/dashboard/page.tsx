@@ -14,6 +14,7 @@ type Todo = {
 
 export default function Dashboard() {
   const [todos, setTodos] = useState<Todo[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [, setLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"todos" | "notes">("todos");

@@ -21,6 +21,7 @@ const STAGES: Stage[] = [
   "Completed",
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function isoDate(d = new Date()) {
   return d.toISOString().slice(0, 10);
 }
@@ -30,9 +31,12 @@ export default function NotesDashboard() {
   const [, setLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  // Editor state (for new note)
+  // Editor state (for new note) - unused but kept for future functionality
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [title, setTitle] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [stage, setStage] = useState<Stage>("Idea");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [lines, setLines] = useState<string[]>([""]);
 
   // Edit mode

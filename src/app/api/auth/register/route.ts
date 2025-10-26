@@ -49,6 +49,7 @@ export async function POST(req: Request) {
       .findOne({ _id: result.insertedId });
 
     // Remove password from response
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _password, ...userWithoutPassword } = newUser!;
 
     return NextResponse.json(
