@@ -8,7 +8,6 @@ const uri = process.env.MONGODB_URI;
 const options: Record<string, unknown> = {};
 
 let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
 
 declare global {
   var _mongoClientPromise: Promise<MongoClient> | undefined;
@@ -19,6 +18,6 @@ if (!global._mongoClientPromise) {
   global._mongoClientPromise = client.connect();
 }
 
-clientPromise = global._mongoClientPromise!;
+const clientPromise = global._mongoClientPromise!;
 
 export default clientPromise;

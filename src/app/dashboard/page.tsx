@@ -14,7 +14,7 @@ type Todo = {
 
 export default function Dashboard() {
   const [todos, setTodos] = useState<Todo[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"todos" | "notes">("todos");
 

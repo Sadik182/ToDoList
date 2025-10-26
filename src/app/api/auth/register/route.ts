@@ -49,7 +49,7 @@ export async function POST(req: Request) {
       .findOne({ _id: result.insertedId });
 
     // Remove password from response
-    const { password: _, ...userWithoutPassword } = newUser!;
+    const { password: _password, ...userWithoutPassword } = newUser!;
 
     return NextResponse.json(
       { message: "User created successfully", user: userWithoutPassword },

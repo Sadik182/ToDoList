@@ -27,7 +27,7 @@ function isoDate(d = new Date()) {
 
 export default function NotesDashboard() {
   const [notes, setNotes] = useState<Note[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   // Editor state (for new note)
@@ -87,59 +87,9 @@ export default function NotesDashboard() {
     });
   }
 
-  // lines helpers
-  function updateLine(idx: number, value: string, setter = setLines) {
-    setter((prev) => {
-      const copy = [...prev];
-      copy[idx] = value;
-      return copy;
-    });
-  }
-  function addLine(afterIdx?: number, setter = setLines) {
-    setter((prev) => {
-      const copy = [...prev];
-      const at = typeof afterIdx === "number" ? afterIdx + 1 : copy.length;
-      copy.splice(at, 0, "");
-      return copy;
-    });
-  }
-  function removeLine(idx: number, setter = setLines) {
-    setter((prev) => {
-      const copy = [...prev];
-      copy.splice(idx, 1);
-      return copy.length ? copy : [""];
-    });
-  }
+  // lines helpers - removed unused functions
 
-  async function createNote(e?: React.FormEvent) {
-    e?.preventDefault();
-    if (!title.trim()) return;
-    setLoading(true);
-    try {
-      const payload = {
-        title: title.trim(),
-        content: lines.join("\n").trim(),
-        date: isoDate(), // always create for today
-        stage,
-      };
-      const res = await fetch("/api/notes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) throw new Error("Failed to create note");
-      const newNote = await res.json();
-      setNotes((s) => [newNote, ...s]);
-      // reset
-      setTitle("");
-      setStage("Idea");
-      setLines([""]);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }
+  // createNote function removed as it's not used
 
   function startEdit(n: Note) {
     setEditingId(n._id || null);
